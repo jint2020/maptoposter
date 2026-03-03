@@ -89,6 +89,7 @@ python create_map_poster.py --city <城市> --country <国家> [选项]
 | `--display-city` | `-dc` | 城市的自定义显示名称（例如 "东京"） |
 | `--display-country` | `-dC` | 国家的自定义显示名称（例如 "日本"） |
 | `--font-family` | | Google Fonts 字体家族名称（例如 "Noto Sans JP"） |
+| `--custom-font` | | 本地字体文件路径，或 `fonts/custom` 目录中的字体文件名（例如 `NotoSansSC-Regular.ttf`） |
 
 **示例：**
 
@@ -104,6 +105,23 @@ python create_map_poster.py -c "Dubai" -C "UAE" -dc "دبي" -dC "الإمارا
 ```
 
 **注意**：字体会自动从 Google Fonts 下载并缓存在 `fonts/cache/` 目录中。
+
+### 本地自定义字体（`--custom-font`）
+
+如果你想使用自己下载的字体文件（不通过 Google Fonts）：
+
+1. 将字体文件放到 `fonts/custom/` 目录（例如：`fonts/custom/MyFont-Regular.ttf`）
+2. 使用 `--custom-font` 参数运行
+
+```bash
+# 使用 fonts/custom/ 中的字体文件名
+python create_map_poster.py -c "Beijing" -C "China" -dc "北京" -dC "中国" --custom-font "MyFont-Regular.ttf"
+
+# 或使用绝对/相对路径
+python create_map_poster.py -c "Tokyo" -C "Japan" -dc "東京" -dC "日本" --custom-font "/path/to/your/font.ttf"
+```
+
+**优先级**：`--custom-font` > `--font-family` > 默认本地 Roboto 字体。
 
 ### 分辨率指南（300 DPI）
 

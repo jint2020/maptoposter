@@ -12,6 +12,36 @@ import requests
 
 FONTS_DIR = "fonts"
 FONTS_CACHE_DIR = Path(FONTS_DIR) / "cache"
+FONTS_CUSTOM_DIR = Path(FONTS_DIR) / "custom"
+
+
+def resolve_custom_font_path(custom_font: str) -> Optional[Path]:
+    """
+    Resolve a user-specified custom font path.
+
+    Accepts either:
+    - Absolute/relative path to a font file
+    - File name inside fonts/custom (with or without extension)
+
+    :param custom_font: Font path or font filename
+    :return: Resolved Path if found, otherwise None
+    """
+    candidate = Path(custom_font).expanduser()
+    if candidate.is_file():
+        return candidate
+
+    direct_in_custom = FONTS_CUSTOM_DIR / custom_font
+    if direct_in_custom.is_file():
+        return direct_in_custom
+
+    base_name = Path(custom_font).stem
+    supported_extensions = [".ttf", ".otf", ".ttc", ".woff", ".woff2"]
+    for extension in supported_extensions:
+        match = FONTS_CUSTOM_DIR / f"{base_name}{extension}"
+        if match.is_file():
+            return match
+
+    return None
 
 
 def detect_chinese_font_needed(text: str) -> bool:
@@ -152,7 +182,7 @@ def download_google_font(font_family: str, weights: list = None) -> Optional[dic
         return None
 
 
-def load_fonts(font_family: Optional[str] = None, text: Optional[str] = None) -> Optional[dict]:
+def load_fonts(font_family: Optional[str] = None, text: Optional[str] = None, custom_font: Optional[str] = None) -> Optional[dict]:
     """
     Load fonts from local directory or download from Google Fonts.
     Returns dict with font paths for different weights.
@@ -162,9 +192,22 @@ def load_fonts(font_family: Optional[str] = None, text: Optional[str] = None) ->
     :param text: Optional text to detect if Chinese font is needed.
                        When font_family is not specified and text contains Chinese,
                        automatically loads Noto Sans SC (Simplified Chinese).
+    :param custom_font: Optional custom font path or filename in fonts/custom.
+                       When provided, the same font file is used for bold/regular/light.
     :return: Dict with 'bold', 'regular', 'light' keys mapping to font file paths,
              or None if all loading methods fail
     """
+    FONTS_CUSTOM_DIR.mkdir(parents=True, exist_ok=True)
+
+    if custom_font:
+        custom_font_path = resolve_custom_font_path(custom_font)
+        if custom_font_path:
+            print(f"✓ Using custom font: {custom_font_path}")
+            shared_font = str(custom_font_path)
+            return {"bold": shared_font, "regular": shared_font, "light": shared_font}
+
+        print(f"⚠ Custom font not found: {custom_font}")
+
     # Auto-detect Chinese font if not specified and text contains Chinese
     if not font_family and text and detect_chinese_font_needed(text):
         print("Detected Chinese characters, loading Noto Sans SC font...")

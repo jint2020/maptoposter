@@ -89,6 +89,7 @@ Display city and country names in your language with custom fonts from google fo
 | `--display-city` | `-dc` | Custom display name for city (e.g., "東京") |
 | `--display-country` | `-dC` | Custom display name for country (e.g., "日本") |
 | `--font-family` | | Google Fonts family name (e.g., "Noto Sans JP") |
+| `--custom-font` | | Local font file path or filename inside `fonts/custom` (e.g., `NotoSansSC-Regular.ttf`) |
 
 **Examples:**
 
@@ -104,6 +105,23 @@ python create_map_poster.py -c "Dubai" -C "UAE" -dc "دبي" -dC "الإمارا
 ```
 
 **Note**: Fonts are automatically downloaded from Google Fonts and cached locally in `fonts/cache/`.
+
+### Local Custom Fonts (`--custom-font`)
+
+If you want to use your own font file (without downloading from Google Fonts):
+
+1. Put your font file into `fonts/custom/` (for example: `fonts/custom/MyFont-Regular.ttf`)
+2. Run with `--custom-font`
+
+```bash
+# Use a font file from fonts/custom/
+python create_map_poster.py -c "Beijing" -C "China" -dc "北京" -dC "中国" --custom-font "MyFont-Regular.ttf"
+
+# Or use an absolute/relative file path
+python create_map_poster.py -c "Tokyo" -C "Japan" -dc "東京" -dC "日本" --custom-font "/path/to/your/font.ttf"
+```
+
+**Priority**: `--custom-font` > `--font-family` > default local Roboto fonts.
 
 ### Resolution Guide (300 DPI)
 

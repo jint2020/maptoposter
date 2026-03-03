@@ -959,6 +959,11 @@ Examples:
         help='Google Fonts family name (e.g., "Noto Sans JP", "Open Sans"). If not specified, uses local Roboto fonts.',
     )
     parser.add_argument(
+        "--custom-font",
+        type=str,
+        help="Custom font file path or filename in fonts/custom (e.g., myfont.ttf or /path/to/myfont.ttf)",
+    )
+    parser.add_argument(
         "--format",
         "-f",
         default="png",
@@ -1016,7 +1021,11 @@ Examples:
 
     # Load custom fonts if specified
     custom_fonts = None
-    if args.font_family:
+    if args.custom_font:
+        custom_fonts = load_fonts(custom_font=args.custom_font)
+        if not custom_fonts:
+            print(f"⚠ Failed to load custom font '{args.custom_font}', falling back to default font flow")
+    elif args.font_family:
         custom_fonts = load_fonts(args.font_family)
         if not custom_fonts:
             print(f"⚠ Failed to load '{args.font_family}', falling back to Roboto")
