@@ -30,7 +30,7 @@ from networkx import MultiDiGraph
 from shapely.geometry import Point
 from tqdm import tqdm
 
-from font_management import load_fonts
+from font_management import detect_chinese_font_needed, load_fonts
 
 
 class CacheError(Exception):
@@ -625,8 +625,18 @@ def create_poster(
     base_coords = 14
     base_attr = 8
 
-    # 4. Typography - use custom fonts if provided, otherwise use default FONTS
-    active_fonts = fonts or FONTS
+    # 4. Typography - use custom fonts if provided, otherwise auto-detect based on display text
+    if fonts:
+        # User-specified fonts (from --font-family parameter)
+        active_fonts = fonts
+    elif detect_chinese_font_needed(display_city) or detect_chinese_font_needed(display_country):
+        # Auto-detect Chinese font if display text contains Chinese
+        print("Detected Chinese in display text, loading Chinese font...")
+        active_fonts = load_fonts(text=display_city + display_country)
+    else:
+        # Use default fonts
+        active_fonts = FONTS
+
     if active_fonts:
         # font_main is calculated dynamically later based on length
         font_sub = FontProperties(

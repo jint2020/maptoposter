@@ -14,6 +14,24 @@ FONTS_DIR = "fonts"
 FONTS_CACHE_DIR = Path(FONTS_DIR) / "cache"
 
 
+def detect_chinese_font_needed(text: str) -> bool:
+    """
+    Detect if text contains characters that require Chinese font support.
+
+    :param text: Text to analyze
+    :return: True if Chinese font is needed, False otherwise
+    """
+    if not text:
+        return False
+    for char in text:
+        # CJK Unified Ideographs Basic: 0x4E00-0x9FFF
+        # CJK Unified Ideographs Extension A: 0x3400-0x4DBF
+        # CJK Unified Ideographs Extension B: 0x20000-0x2A6DF (not checked for performance)
+        if '\u4e00' <= char <= '\u9fff' or '\u3400' <= char <= '\u4dbf':
+            return True
+    return False
+
+
 def download_google_font(font_family: str, weights: list = None) -> Optional[dict]:
     """
     Download a font family from Google Fonts and cache it locally.
@@ -134,16 +152,24 @@ def download_google_font(font_family: str, weights: list = None) -> Optional[dic
         return None
 
 
-def load_fonts(font_family: Optional[str] = None) -> Optional[dict]:
+def load_fonts(font_family: Optional[str] = None, text: Optional[str] = None) -> Optional[dict]:
     """
     Load fonts from local directory or download from Google Fonts.
     Returns dict with font paths for different weights.
 
     :param font_family: Google Fonts family name (e.g., 'Noto Sans JP', 'Open Sans').
                        If None, uses local Roboto fonts.
+    :param text: Optional text to detect if Chinese font is needed.
+                       When font_family is not specified and text contains Chinese,
+                       automatically loads Noto Sans SC (Simplified Chinese).
     :return: Dict with 'bold', 'regular', 'light' keys mapping to font file paths,
              or None if all loading methods fail
     """
+    # Auto-detect Chinese font if not specified and text contains Chinese
+    if not font_family and text and detect_chinese_font_needed(text):
+        print("Detected Chinese characters, loading Noto Sans SC font...")
+        font_family = "Noto Sans SC"
+
     # If custom font family specified, try to download from Google Fonts
     if font_family and font_family.lower() != "roboto":
         print(f"Loading Google Font: {font_family}")
